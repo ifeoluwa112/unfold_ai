@@ -174,9 +174,8 @@ class BiometricChart extends StatelessWidget {
 
     // Filter by date range
     // For demo purposes, use the last date in the data as "now"
-    final lastDate = data
-        .map((d) => d.dateTime)
-        .reduce((a, b) => a.isAfter(b) ? a : b);
+    final lastDate =
+        data.map((d) => d.dateTime).reduce((a, b) => a.isAfter(b) ? a : b);
     DateTime startDate;
     switch (selectedRange) {
       case DataRange.sevenDays:
@@ -190,9 +189,8 @@ class BiometricChart extends StatelessWidget {
         break;
     }
 
-    var filteredData = data
-        .where((d) => d.dateTime.isAfter(startDate))
-        .toList();
+    var filteredData =
+        data.where((d) => d.dateTime.isAfter(startDate)).toList();
 
     // Remove any duplicate dates to prevent overlapping labels
     filteredData = filteredData.fold<List<BiometricData>>([], (acc, current) {
@@ -285,13 +283,27 @@ class BiometricChart extends StatelessWidget {
   double _getMinY(List<BiometricData> data) {
     if (data.isEmpty) return 0;
     final values = data.map(_getYValue).toList();
-    return values.reduce((a, b) => a < b ? a : b) * 0.9;
+    final minValue = values.reduce((a, b) => a < b ? a : b);
+
+    // For steps, ensure clean intervals
+    if (chartType == ChartType.steps) {
+      return (minValue * 0.85).floor() / 1000 * 1000;
+    }
+
+    return minValue * 0.9;
   }
 
   double _getMaxY(List<BiometricData> data) {
     if (data.isEmpty) return 100;
     final values = data.map(_getYValue).toList();
-    return values.reduce((a, b) => a > b ? a : b) * 1.1;
+    final maxValue = values.reduce((a, b) => a > b ? a : b);
+
+    // For steps, ensure clean intervals
+    if (chartType == ChartType.steps) {
+      return (maxValue * 1.15).ceil() / 1000 * 1000;
+    }
+
+    return maxValue * 1.1;
   }
 
   double _getHorizontalInterval() {
@@ -308,11 +320,11 @@ class BiometricChart extends StatelessWidget {
   double _getLeftInterval() {
     switch (chartType) {
       case ChartType.hrv:
-        return 10;
+        return 15; // Increased to prevent overlapping
       case ChartType.rhr:
-        return 10;
+        return 15; // Increased to prevent overlapping
       case ChartType.steps:
-        return 2000;
+        return 4000; // Increased to prevent overlapping
     }
   }
 
@@ -415,4 +427,3 @@ class BiometricChart extends StatelessWidget {
 }
 
 enum ChartType { hrv, rhr, steps }
-
