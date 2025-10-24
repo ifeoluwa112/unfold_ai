@@ -101,7 +101,7 @@ flutter test test/widget/
 flutter test
 ```
 
-## 📚 Library Choices & Rationale
+## Library Choices & Rationale
 
 ### State Management: **flutter_bloc**
 - **Why**: Predictable state management with clear data flow
@@ -225,7 +225,7 @@ flutter test
 - `bloc_test: ^9.1.7` - BLoC testing
 - `mocktail: ^1.0.4` - Mocking for tests
 
-## 🧪 Testing Strategy
+## Testing Strategy
 
 ### Unit Tests (`test/unit/`)
 - **DataDecimator**: Tests LTTB and bucket aggregation algorithms
