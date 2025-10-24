@@ -123,7 +123,7 @@ flutter test
 - **Benefits**: Easy state testing, widget testing, mock object creation
 - **Alternative Considered**: Basic flutter_test (chose specialized tools for better coverage)
 
-## ⚡ Performance Notes
+## Performance Notes
 
 ### Decimation Algorithm Explanation
 
