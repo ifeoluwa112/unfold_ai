@@ -2,9 +2,9 @@
 
 This document outlines the key architectural and implementation decisions made during the development of the Biometrics Dashboard, including what features were cut and why.
 
-## 🏗️ Architecture Trade-offs
+## Architecture Trade-offs
 
-### ✅ Chosen: Clean Architecture with Feature-Based Structure
+### Chosen: Clean Architecture with Feature-Based Structure
 
 **Decision**: Organized code into `core/`, `features/`, and `ui/` directories with clear separation of concerns.
 
@@ -22,7 +22,7 @@ This document outlines the key architectural and implementation decisions made d
 **Alternative Considered**: Monolithic structure with everything in `lib/`
 **Why Rejected**: Would become unmaintainable as the app grows
 
-### ✅ Chosen: BLoC Pattern for State Management
+### Chosen: BLoC Pattern for State Management
 
 **Decision**: Used `flutter_bloc` for state management instead of Provider or setState.
 
@@ -43,9 +43,9 @@ This document outlines the key architectural and implementation decisions made d
 - Riverpod: Too new, less ecosystem support
 - setState: Not suitable for complex state
 
-## 📊 Data Visualization Trade-offs
+## Data Visualization Trade-offs
 
-### ✅ Chosen: fl_chart Library
+### Chosen: fl_chart Library
 
 **Decision**: Used `fl_chart` for chart rendering instead of `charts_flutter` or custom Canvas.
 
@@ -66,7 +66,7 @@ This document outlines the key architectural and implementation decisions made d
 - Custom Canvas: Too much development time
 - Web-based charts: Flutter web integration complexity
 
-### ✅ Chosen: LTTB Decimation Algorithm
+### Chosen: LTTB Decimation Algorithm
 
 **Decision**: Implemented Largest Triangle Three Buckets algorithm for data decimation.
 
@@ -87,9 +87,9 @@ This document outlines the key architectural and implementation decisions made d
 - Bucket averaging: Too much visual smoothing
 - No decimation: Poor performance with large datasets
 
-## 🎨 UI/UX Trade-offs
+## UI/UX Trade-offs
 
-### ✅ Chosen: Material Design 3
+### Chosen: Material Design 3
 
 **Decision**: Used Material Design 3 components and theming.
 
@@ -109,7 +109,7 @@ This document outlines the key architectural and implementation decisions made d
 - Custom design: Too much development time
 - Cupertino: Not suitable for web/Android
 
-### ✅ Chosen: Synchronized Charts with Shared Tooltips
+### Chosen: Synchronized Charts with Shared Tooltips
 
 **Decision**: Implemented cross-chart synchronization for tooltips and interactions.
 
@@ -129,9 +129,9 @@ This document outlines the key architectural and implementation decisions made d
 - Independent charts: Poor user experience
 - Single chart: Limited data visibility
 
-## ⚡ Performance Trade-offs
+## Performance Trade-offs
 
-### ✅ Chosen: On-Demand Data Processing
+### Chosen: On-Demand Data Processing
 
 **Decision**: Process and decimate data on-demand rather than pre-computing.
 
@@ -151,7 +151,7 @@ This document outlines the key architectural and implementation decisions made d
 - Pre-computed: Too much memory usage
 - Server-side: Network dependency, complexity
 
-### ✅ Chosen: Hybrid Decimation Strategy
+### Chosen: Hybrid Decimation Strategy
 
 **Decision**: Use LTTB for smaller datasets, bucket aggregation for very large ones.
 
@@ -171,9 +171,9 @@ This document outlines the key architectural and implementation decisions made d
 - No decimation: Poor performance
 - Aggressive decimation: Poor visual quality
 
-## 🧪 Testing Trade-offs
+## Testing Trade-offs
 
-### ✅ Chosen: Comprehensive Test Coverage
+### Chosen: Comprehensive Test Coverage
 
 **Decision**: Implemented both unit tests and widget tests with high coverage.
 
@@ -193,7 +193,7 @@ This document outlines the key architectural and implementation decisions made d
 - Minimal testing: Too risky for complex algorithms
 - Integration only: Hard to isolate issues
 
-### ✅ Chosen: Mock Objects for Testing
+### Chosen: Mock Objects for Testing
 
 **Decision**: Used `mocktail` for creating mock objects in tests.
 
@@ -214,9 +214,9 @@ This document outlines the key architectural and implementation decisions made d
 - No mocking: Hard to test edge cases
 - Manual mocks: Too much boilerplate
 
-## 🚀 Features Cut & Why
+## Features Cut & Why
 
-### ❌ Cut: Real-time Data Streaming
+### Cut: Real-time Data Streaming
 
 **What**: Live data updates from external APIs or WebSocket connections.
 
@@ -288,7 +288,7 @@ This document outlines the key architectural and implementation decisions made d
 
 **Impact**: Web-first implementation with responsive design
 
-## 🔮 Future Considerations
+## Future Considerations
 
 ### Potential Additions
 - **Real-time Data**: When backend infrastructure is available
@@ -308,7 +308,7 @@ This document outlines the key architectural and implementation decisions made d
 - **Caching**: Could add more sophisticated caching strategies
 - **Bundle Splitting**: Could optimize web bundle size further
 
-## 📊 Decision Summary
+## Decision Summary
 
 | Decision | Benefit | Trade-off | Alternative |
 |----------|---------|-----------|-------------|
