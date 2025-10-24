@@ -2,7 +2,7 @@
 
 A lightweight, interactive Flutter web application that visualizes multiple time-series biometric datasets with smooth pan/zoom, shared tooltips, and performance optimizations for large datasets.
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 This project follows a **Clean Architecture** pattern with clear separation of concerns:
 
@@ -28,7 +28,7 @@ lib/
 - **Feature-Based Structure**: Each feature is self-contained with its own business logic
 - **Barrel Exports**: Clean imports through `core.dart`, `features.dart`, `ui.dart`
 
-## 📊 Features
+## Features
 
 ### Synchronized Charts
 - **HRV (Heart Rate Variability)**: Blue line chart with 7-day rolling mean bands
@@ -54,7 +54,7 @@ lib/
 - **Empty States**: Graceful handling of missing data
 - **Network Simulation**: 700-1200ms latency with ~10% failure rate
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Flutter SDK 3.9.2 or higher
@@ -168,7 +168,7 @@ flutter test
 - **On-demand**: Lower memory, higher processing time
 - **Chosen**: On-demand with caching for optimal balance
 
-## 🎯 Usage
+## Usage
 
 ### Basic Navigation
 1. **Load Data**: Application automatically loads mock data on startup
@@ -188,7 +188,7 @@ flutter test
 - **Large Dataset Mode**: Simulates 10k+ data points
 - **Performance Info**: Shows when decimation is active
 
-## 📁 Data Format
+## Data Format
 
 ### Biometric Data (assets/biometrics_90d.json)
 ```json
@@ -210,7 +210,7 @@ flutter test
 }
 ```
 
-## 🔧 Dependencies
+## Dependencies
 
 ### Core Dependencies
 - `flutter_bloc: ^8.1.6` - State management
@@ -242,7 +242,7 @@ flutter test
 - **Isolated Testing**: Each test is independent and repeatable
 - **Performance Testing**: Validates decimation algorithms
 
-## 🚀 Deployment
+## Deployment
 
 ### Web Deployment
 ```bash
