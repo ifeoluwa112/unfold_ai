@@ -12,6 +12,7 @@ class DashboardState extends Equatable {
   final String? error;
   final DateTime? selectedDate;
   final bool isLargeDataset;
+  final JournalEntry? selectedJournalEntry;
 
   const DashboardState({
     this.biometricData = const [],
@@ -21,6 +22,7 @@ class DashboardState extends Equatable {
     this.error,
     this.selectedDate,
     this.isLargeDataset = false,
+    this.selectedJournalEntry,
   });
 
   DashboardState copyWith({
@@ -31,6 +33,7 @@ class DashboardState extends Equatable {
     String? error,
     DateTime? selectedDate,
     bool? isLargeDataset,
+    JournalEntry? selectedJournalEntry,
   }) {
     return DashboardState(
       biometricData: biometricData ?? this.biometricData,
@@ -40,6 +43,7 @@ class DashboardState extends Equatable {
       error: error,
       selectedDate: selectedDate ?? this.selectedDate,
       isLargeDataset: isLargeDataset ?? this.isLargeDataset,
+      selectedJournalEntry: selectedJournalEntry,
     );
   }
 
@@ -52,5 +56,6 @@ class DashboardState extends Equatable {
     error,
     selectedDate,
     isLargeDataset,
+    selectedJournalEntry,
   ];
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 export 'package:unfold_ai/features/features.dart';
 import 'package:unfold_ai/ui/ui.dart';
+import 'package:unfold_ai/core/core.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -39,7 +40,7 @@ class DashboardView extends StatelessWidget {
         ],
       ),
       body: BlocBuilder<DashboardBloc, DashboardState>(
-        builder: (context, state) { 
+        builder: (context, state) {
           if (state.isLoading) {
             return const LoadingWidget();
           }
@@ -92,7 +93,7 @@ class DashboardView extends StatelessWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Large dataset mode enabled - Data decimation applied for optimal performance',
+                            'Large dataset mode (10k+ points) - LTTB decimation active for 60 FPS performance',
                             style: TextStyle(
                               color: Theme.of(
                                 context,
@@ -111,6 +112,8 @@ class DashboardView extends StatelessWidget {
                   'Heart Rate Variability (HRV)',
                   ChartType.hrv,
                   state,
+                  onJournalTapped: (entry) =>
+                      context.read<DashboardBloc>().selectJournalEntry(entry),
                 ),
 
                 const SizedBox(height: 24),
@@ -120,6 +123,8 @@ class DashboardView extends StatelessWidget {
                   'Resting Heart Rate (RHR)',
                   ChartType.rhr,
                   state,
+                  onJournalTapped: (entry) =>
+                      context.read<DashboardBloc>().selectJournalEntry(entry),
                 ),
 
                 const SizedBox(height: 24),
@@ -129,12 +134,17 @@ class DashboardView extends StatelessWidget {
                   'Daily Steps',
                   ChartType.steps,
                   state,
+                  onJournalTapped: (entry) =>
+                      context.read<DashboardBloc>().selectJournalEntry(entry),
                 ),
 
                 const SizedBox(height: 24),
 
-                // Journal Entries
-                _buildJournalSection(context, state),
+                // Selected Date Summary Card
+                if (state.selectedDate != null)
+                  _buildSelectedDateCard(context, state),
+
+                const SizedBox(height: 24),
               ],
             ),
           );
@@ -147,8 +157,9 @@ class DashboardView extends StatelessWidget {
     BuildContext context,
     String title,
     ChartType chartType,
-    DashboardState state,
-  ) {
+    DashboardState state, {
+    void Function(JournalEntry?)? onJournalTapped,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -181,74 +192,286 @@ class DashboardView extends StatelessWidget {
             onDateSelected: (date) {
               context.read<DashboardBloc>().selectDate(date);
             },
+            onJournalTapped: onJournalTapped,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildJournalSection(BuildContext context, DashboardState state) {
-    // For demo purposes, show all journal entries regardless of date range
-    final relevantEntries = state.journalEntries.toList();
+  Widget _buildSelectedDateCard(BuildContext context, DashboardState state) {
+    final selectedDate = state.selectedDate!;
 
-    if (relevantEntries.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Journal Entries',
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        ...relevantEntries.map((entry) => _buildJournalEntry(context, entry)),
-      ],
+    // Find biometric data for selected date
+    final biometricData = state.biometricData.firstWhere(
+      (data) =>
+          data.dateTime.year == selectedDate.year &&
+          data.dateTime.month == selectedDate.month &&
+          data.dateTime.day == selectedDate.day,
+      orElse: () => const BiometricData(
+        date: '',
+        hrv: 0,
+        rhr: 0,
+        steps: 0,
+        sleepScore: 0,
+      ),
     );
-  }
 
-  Widget _buildJournalEntry(BuildContext context, journalEntry) {
+    // Find journal entry for selected date
+    final journalEntry = state.journalEntries.firstWhere((entry) {
+      final entryDate = entry.dateTime;
+      return entryDate.year == selectedDate.year &&
+          entryDate.month == selectedDate.month &&
+          entryDate.day == selectedDate.day;
+    }, orElse: () => const JournalEntry(date: '', mood: 0, note: ''));
+
+    final hasJournalEntry = journalEntry.mood > 0;
     final moodEmoji = _getMoodEmoji(journalEntry.mood);
     final moodColor = _getMoodColor(journalEntry.mood);
+    final moodIcon = _getMoodIcon(journalEntry.mood);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: moodColor.withValues(alpha: 0.3), width: 1),
+        gradient: LinearGradient(
+          colors: hasJournalEntry
+              ? [
+                  moodColor.withValues(alpha: 0.2),
+                  moodColor.withValues(alpha: 0.05),
+                ]
+              : [
+                  Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  Theme.of(context).colorScheme.surface,
+                ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: hasJournalEntry
+              ? moodColor.withValues(alpha: 0.4)
+              : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: hasJournalEntry
+                ? moodColor.withValues(alpha: 0.1)
+                : Colors.black.withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Row(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(moodEmoji, style: const TextStyle(fontSize: 24)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  journalEntry.note,
-                  style: Theme.of(context).textTheme.bodyMedium,
+          // Header with date and mood
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    if (hasJournalEntry) ...[
+                      Text(moodEmoji, style: const TextStyle(fontSize: 32)),
+                      const SizedBox(width: 12),
+                      Icon(moodIcon, color: moodColor, size: 28),
+                      const SizedBox(width: 8),
+                      Text(
+                        _formatDate(selectedDate),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: moodColor,
+                        ),
+                      ),
+                    ] else ...[
+                      Icon(
+                        Icons.calendar_today,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 28,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        _formatDate(selectedDate),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  journalEntry.date,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+              if (hasJournalEntry)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: moodColor.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: moodColor.withValues(alpha: 0.4),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    _getMoodText(journalEntry.mood),
+                    style: TextStyle(
+                      color: moodColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
-              ],
+            ],
+          ),
+
+          // Journal note if available
+          if (hasJournalEntry && journalEntry.note.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: moodColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.note, color: moodColor, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      journalEntry.note,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
+          ],
+
+          const SizedBox(height: 20),
+          const Divider(height: 1),
+
+          // Biometric values
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              _buildBiometricValue(
+                context,
+                icon: Icons.favorite,
+                color: Colors.blue,
+                label: 'HRV',
+                value: biometricData.hrv.toStringAsFixed(1),
+              ),
+              const SizedBox(width: 16),
+              _buildBiometricValue(
+                context,
+                icon: Icons.monitor_heart,
+                color: Colors.red,
+                label: 'RHR',
+                value: '${biometricData.rhr} bpm',
+              ),
+              const SizedBox(width: 16),
+              _buildBiometricValue(
+                context,
+                icon: Icons.directions_walk,
+                color: Colors.green,
+                label: 'Steps',
+                value: '${biometricData.steps}',
+              ),
+            ],
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildBiometricValue(
+    BuildContext context, {
+    required IconData icon,
+    required Color color,
+    required String label,
+    required String value,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${_getMonthName(date.month)} ${date.day}, ${date.year}';
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return months[month - 1];
+  }
+
+  IconData _getMoodIcon(int mood) {
+    switch (mood) {
+      case 1:
+        return Icons.sentiment_very_dissatisfied;
+      case 2:
+        return Icons.sentiment_dissatisfied;
+      case 3:
+        return Icons.sentiment_neutral;
+      case 4:
+        return Icons.sentiment_satisfied;
+      case 5:
+        return Icons.sentiment_very_satisfied;
+      default:
+        return Icons.sentiment_neutral;
+    }
   }
 
   String _getMoodEmoji(int mood) {
@@ -282,6 +505,23 @@ class DashboardView extends StatelessWidget {
         return Colors.green;
       default:
         return Colors.grey;
+    }
+  }
+
+  String _getMoodText(int mood) {
+    switch (mood) {
+      case 1:
+        return 'Very Poor';
+      case 2:
+        return 'Poor';
+      case 3:
+        return 'Neutral';
+      case 4:
+        return 'Good';
+      case 5:
+        return 'Excellent';
+      default:
+        return 'Unknown';
     }
   }
 }
