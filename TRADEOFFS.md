@@ -22,7 +22,7 @@ This document outlines the key architectural and implementation decisions made d
 **Alternative Considered**: Monolithic structure with everything in `lib/`
 **Why Rejected**: Would become unmaintainable as the app grows
 
-### Chosen: BLoC Pattern for State Management
+### ✅ Chosen: BLoC Pattern for State Management
 
 **Decision**: Used `flutter_bloc` for state management instead of Provider or setState.
 
@@ -129,7 +129,7 @@ This document outlines the key architectural and implementation decisions made d
 - Independent charts: Poor user experience
 - Single chart: Limited data visibility
 
-## Performance Trade-offs
+## ⚡ Performance Trade-offs
 
 ### Chosen: On-Demand Data Processing
 
@@ -216,7 +216,7 @@ This document outlines the key architectural and implementation decisions made d
 
 ## Features Cut & Why
 
-### Cut: Real-time Data Streaming
+### ❌ Cut: Real-time Data Streaming
 
 **What**: Live data updates from external APIs or WebSocket connections.
 
